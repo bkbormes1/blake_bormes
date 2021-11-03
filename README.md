@@ -1,5 +1,9 @@
 # W205_Project_3
 
+Good
+https://sportsdata.io/developers/api-documentation/nfl#/fantasy/nfl-v3-projections-projected-player-game-stats-by-week-w-injuries-lineups-dfs-salaries
+
+Bad
 https://www.espn.com/apis/devcenter/overview.html  
 http://espn-fantasy-football-api.s3-website.us-east-2.amazonaws.com/
 
