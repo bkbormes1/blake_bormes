@@ -3,6 +3,13 @@
 https://www.espn.com/apis/devcenter/overview.html  
 http://espn-fantasy-football-api.s3-website.us-east-2.amazonaws.com/
 
+# Notes
+- create script (can be bash) to run kafka/pyspark set up in terminal
+- use notebook for visualizations and exploratory analysis
+- limit columns for only what we want to use in analysis (scores, teams, betting info, other ideas?). Make our table queryable
+- we need to think about our 'research questions' - what will we use this pipeline for
+
+
 # Project 3: Understanding User Behavior
 
 ## This is a team project, up to 4 people per team. At Week 14, you will present your project to the class.
