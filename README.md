@@ -8,8 +8,16 @@ https://www.espn.com/apis/devcenter/overview.html
 http://espn-fantasy-football-api.s3-website.us-east-2.amazonaws.com/
 
 # Notes
-- create script (can be bash) to run kafka/pyspark set up in terminal
-- use notebook for visualizations and exploratory analysis
+Pipeline:
+Events-Stream-Queue-Store
+- create script (can be bash) to run kafka/pyspark set up in terminal ('doing the jobs')
+- py scripts will GET data, filter into table, save to Hadoop
+- run script in terminal using 'exec spark, spark-submit'
+
+Query-Analysis
+- use notebook for visualizations and exploratory analysis (query side)
+
+Next Steps
 - limit columns for only what we want to use in analysis (scores, teams, betting info, other ideas?). Make our table queryable
 - we need to think about our 'research questions' - what will we use this pipeline for
 
