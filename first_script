@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# My first script
+
+docker-compose up -d
+
+sleep 60s # Waits 15 seconds.
+
+docker-compose ps
+
+docker-compose exec -T kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+
+sleep 10s
+
+docker-compose exec -d mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
+
+sleep 10s
+
+docker-compose exec mids curl http://localhost:5000/get_game_data
+
+sleep 10s
+
+
+

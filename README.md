@@ -46,20 +46,21 @@ Next Steps
 
 ## Tasks
 
-- Instrument your API server to log events to Kafka
+- Instrument your API server to log events to Kafka (Alex)
 
 - Assemble a data pipeline to catch these events: use Spark streaming to filter
   select event types from Kafka, land them into HDFS/parquet to make them
-  available for analysis using Presto. 
+  available for analysis using Presto. (Austin)
 
-- Use Apache Bench to generate test data for your pipeline.
+- Use Apache Bench to generate test data for your pipeline. (Blake)
 
-- Produce an analytics report where you provide a description of your pipeline
-  and some basic analysis of the events. Explaining the pipeline is key for this project!
+- Construct some research questions from the data (Alex)
 
-- Submit your work as a git PR as usual. AFTER you have received feedback you have to merge 
-  the branch yourself and answer to the feedback in a comment. Your grade will not be 
-  complete unless this is done!
+- Conduct some basic analysis on the events - queries/visualizations in a notebook (Courtney)
+
+- Produce an analytics report where you provide a description of your pipeline. (All)
+- Produce a presentation for Week 14 - in 3 weeks (All)
+
 
 Use a notebook or markdown to present your queries and findings. Remember that this
 notebook should be appropriate for presentation to someone else in your
