@@ -1,12 +1,36 @@
-docker-compose up -d
-docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
-docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
-docker-compose exec mids curl http://localhost:5000/get_game_data
-docker-compose exec mids jq '.[]' -c | kafkacat -P -b kafka:29092 -t games && echo 'Produced 100 messages.'
-
-# THE BEST ONE
-docker-compose exec mids bash -c "kafkacat -C -b kafka:29092 -t games -o beginning -e | jq '.[]' -c"
-
-
+#to run bash script
 chmod 755 first_script
 ./first_script
+
+
+#11/25 update
+#run each of these manually for now, will need to be turned into a bash script 
+
+docker-compose up -d
+docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+docker-compose exec mids env FLASK_APP=/w205/full-stack/nfl_api.py flask run --host 0.0.0.0
+docker-compose exec mids curl http://localhost:5000/get_game_data
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning -e
+docker-compose exec spark pyspark
+
+
+#in spark
+import json
+
+raw_events = spark \
+...   .read \
+...   .format("kafka") \
+...   .option("kafka.bootstrap.servers", "kafka:29092") \
+...   .option("subscribe","games") \
+...   .option("startingOffsets", "earliest") \
+...   .option("endingOffsets", "latest") \
+...   .load()
+
+events = raw_events.select(raw_events.value.cast('string'))
+
+final_schema = StructType([StructField('GameKey', StringType(), True),StructField('AwayTeam', StringType(), True),StructField('HomeTeam', StringType(), True)])
+
+
+games_df = events.rdd.map(lambda x: json.loads(x.value)).toDF(schema=final_schema)
+
+

@@ -9,7 +9,9 @@ producer = KafkaProducer(bootstrap_servers='kafka:29092')
 
 
 def log_to_kafka(topic, event):
-    producer.send(topic, json.dumps(event).encode())
+    for i in range(0,len(event)):
+        game = json.dumps(event[i]).encode()
+        producer.send(topic, game)
 
 @app.route("/")
 def default_response():
