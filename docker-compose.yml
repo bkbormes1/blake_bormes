@@ -29,6 +29,17 @@ services:
     extra_hosts:
       - "moby:127.0.0.1"
 
+  cloudera:
+    image: midsw205/cdh-minimal:latest
+    expose:
+      - "8020" # nn
+      - "50070" # nn http
+      - "8888" # hue
+    #ports:
+    #- "8888:8888"
+    extra_hosts:
+      - "moby:127.0.0.1"
+
   spark:
     image: midsw205/spark-python:0.0.5
     stdin_open: true
@@ -39,12 +50,16 @@ services:
       - "8888"
     ports:
       - "8888:8888"
+    depends_on:
+      - cloudera
+    environment:
+      HADOOP_NAMENODE: cloudera
     extra_hosts:
       - "moby:127.0.0.1"
     command: bash
 
   mids:
-    image: midsw205/base:0.1.8
+    image: midsw205/base:0.1.9
     stdin_open: true
     tty: true
     volumes:
