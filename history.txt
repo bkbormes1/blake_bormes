@@ -8,11 +8,12 @@ chmod 755 first_script
 
 docker-compose up -d
 docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
-docker-compose exec mids env FLASK_APP=/w205/full-stack/nfl_api.py flask run --host 0.0.0.0
+docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
 docker-compose exec mids curl http://localhost:5000/get_game_data
 docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning -e
-docker-compose exec spark pyspark
+docker-compose exec spark env PYSPARK_DRIVER_PYTHON=jupyter PYSPARK_DRIVER_PYTHON_OPTS='notebook --no-browser --port 8888 --ip 0.0.0.0 --allow-root --notebook-dir=/w205/' pyspark
 
+# Open Spark in Jupyter Notebook Spark_Testing
 
 #in spark
 import json
@@ -20,7 +21,7 @@ import json
 raw_events = spark \
 ...   .read \
 ...   .format("kafka") \
-...   .option("kafka.bootstrap.servers", "kafka:29092") \
+...   .option("kafka.bootstrap.importservers", "kafka:29092") \
 ...   .option("subscribe","games") \
 ...   .option("startingOffsets", "earliest") \
 ...   .option("endingOffsets", "latest") \
