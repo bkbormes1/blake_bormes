@@ -4,7 +4,7 @@
 
 import json
 from pyspark.sql import SparkSession
-
+from pyspark.sql.functions import udf
 
 def main():
     """main
@@ -25,9 +25,10 @@ def main():
     
 # Adjust as necessary to properly format our table
     games = raw_games.select(raw_games.value.cast('string'))
-    extracted_games = games.rdd.map(lambda x: json.loads(x.value)).toDF()
+    final_schema = StructType([StructField('GameKey', StringType(), True),StructField('AwayTeam', StringType(), True),StructField('HomeTeam', StringType(), True)])
+    games_df = games.rdd.map(lambda x: json.loads(x.value)).toDF(schema=final_schema)
 
-    extracted_games \
+    games_df \
         .write \
         .parquet("/tmp/extracted_games")
 
