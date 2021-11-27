@@ -9,7 +9,6 @@ chmod 755 first_script
 docker-compose up -d
 docker-compose exec cloudera hadoop fs -ls /tmp/
 docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
-<<<<<<< HEAD
 docker-compose exec -d mids env FLASK_APP=/w205/full-stack/nfl_api.py flask run --host 0.0.0.0
 
 for i in {1..6}; do
@@ -19,18 +18,9 @@ for i in {1..6}; do
   sleep 600
 done
 
-=======
-docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
-docker-compose exec mids curl http://localhost:5000/get_game_data
->>>>>>> origin/main
 docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning -e
-docker-compose exec spark env PYSPARK_DRIVER_PYTHON=jupyter PYSPARK_DRIVER_PYTHON_OPTS='notebook --no-browser --port 8888 --ip 0.0.0.0 --allow-root --notebook-dir=/w205/' pyspark
+docker-compose exec spark pyspark
 
-<<<<<<< HEAD
-=======
-# Open Spark in Jupyter Notebook Spark_Testing
-
->>>>>>> origin/main
 #in spark
 import json
 import pandas as pd
@@ -41,7 +31,6 @@ from pyspark.sql.functions import size
 from pyspark.sql.functions import regexp_replace
 
 raw_events = spark \
-<<<<<<< HEAD
 .read \
 .format("kafka") \
 .option("kafka.bootstrap.servers", "kafka:29092") \
@@ -49,15 +38,6 @@ raw_events = spark \
 .option("startingOffsets", "earliest") \
 .option("endingOffsets", "latest") \
 .load()
-=======
-...   .read \
-...   .format("kafka") \
-...   .option("kafka.bootstrap.importservers", "kafka:29092") \
-...   .option("subscribe","games") \
-...   .option("startingOffsets", "earliest") \
-...   .option("endingOffsets", "latest") \
-...   .load()
->>>>>>> origin/main
 
 events = raw_events.select(raw_events.value.cast('string'))
 
