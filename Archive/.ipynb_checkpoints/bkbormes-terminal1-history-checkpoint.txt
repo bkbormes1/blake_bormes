@@ -1,0 +1,128 @@
+    1  cd w205/project-2-bkbormes1
+    2  curl -L -o assessment-attempts-20180128-121051-nested.json https://goo.gl/ME6hjp`
+    3  curl -L -o assessment-attempts-20180128-121051-nested.json https://goo.gl/ME6hjp
+    4  docker-compose ps
+    5  docker-compose up -d
+    6  docker-compose logs -f kafka
+    7  docker-compose exec cloudera hadoop fs -ls /tmp/
+    8  docker-compose exec kafka   kafka-topics     --create     --topic exams     --partitions 1     --replication-factor 1     --if-not-exists     --zookeeper zookeeper:32181
+    9  docker-compose exec mids   bash -c "cat /w205/project-2-bkbormes1/assessment-attempts-20180128-121051-nested.json \
+   10      | jq '.[]' -c \
+   11      | kafkacat -P -b kafka:29092 -t exams"
+   12  docker-compose exec spark pyspark
+   13  docker-compose exec spark cat /root/.python_history
+   14  docker-compose down
+   15  history > bkbormes1-history.txt
+   16  docker-compose exec cloudera hadoop fs -ls /tmp/
+   17  cd w205/project-2-bkbormes1/
+   18  docker-compose exec cloudera hadoop fs -ls /tmp/
+   19  docker-compose exec cloudera hadoop fs -ls /tmp/exams/
+   20  mkdir w205
+   21  cd w205/
+   22  git clone https://github.com/mids-w205-de-sola/course-content-fall2021.git
+   23  git clone https://github.com/mids-w205-de-sola/course-content-fall2021.git
+   24  git clone https://github.com/mids-w205-de-sola/course-content-fall2021.git
+   25  git clone https://github.com/mids-w205-de-sola/course-content-fall2021.git
+   26  git clone https://github.com/mids-w205-de-sola/project-1-bkbormes1.git
+   27  cd project-1-bkbormes1
+   28  ls
+   29  git branch
+   30  git checkout -b blake_project1
+   31  bq query --use_legacy_sql=false '
+   32      SELECT count(*)
+   33      FROM
+   34         `bigquery-public-data.san_francisco.bikeshare_trips`'
+   35      bq query --use_legacy_sql=false '
+   36          SELECT min(start_date), max(end_date)
+   37          FROM
+   38             `bigquery-public-data.san_francisco.bikeshare_trips`'
+   39  bq query --use_legacy_sql=false '
+   40          SELECT count(distinct bike_number)
+   41          FROM
+   42             `bigquery-public-data.san_francisco.bikeshare_trips`'
+   43  bq query --use_legacy_sql=false '
+   44          SELECT SUM(
+   45              CASE 
+   46                  WHEN time(CAST(start_date AS datetime) ) < '12:00:00'
+   47                  THEN 1
+   48                  ELSE 0
+   49              END 
+   50          ) AS Morning_Trips, 
+   51          SUM(
+   52              CASE 
+   53                  WHEN time(CAST(start_date AS datetime) ) >= '12:00:00'
+   54                  THEN 1
+   55                  ELSE 0
+   56              END 
+   57          ) AS Evening_Trips, 
+   58          FROM `bigquery-public-data.san_francisco.bikeshare_trips`'
+   59      bq query --use_legacy_sql=false '
+   60          SELECT count(distinct bike_number) AS Num_Bikes
+   61          FROM
+   62             `bigquery-public-data.san_francisco.bikeshare_trips`'
+   63      bq query --use_legacy_sql=false '
+   64          SELECT SUM(
+   65          CASE 
+   66              WHEN time(CAST(start_date AS datetime) ) < '12:00:00'
+   67              THEN 1
+   68              ELSE 0
+   69          END 
+   70      ) AS Morning_Trips, 
+   71      SUM(
+   72          CASE 
+   73              WHEN time(CAST(start_date AS datetime) ) >= '12:00:00'
+   74              THEN 1
+   75              ELSE 0
+   76          END 
+   77      ) AS Evening_Trips, 
+   78      FROM `bigquery-public-data.san_francisco.bikeshare_trips`'
+   79  bq query --use_legacy_sql=false '
+   80          SELECT Count(*) AS Morning_Trips, 
+   81          FROM `bigquery-public-data.san_francisco.bikeshare_trips`'
+   82          WHERE time(CAST(start_date AS datetime) ) < '12:00:00'bq query --use_legacy_sql=false '
+   83          SELECT Count(*) AS Morning_Trips, 
+   84          FROM `bigquery-public-data.san_francisco.bikeshare_trips`'
+   85          WHERE time(CAST(start_date AS datetime) ) < '12:00:00'bq query --use_legacy_sql=false '
+   86          SELECT Count(*) AS Morning_Trips, 
+   87          FROM `bigquery-public-data.san_francisco.bikeshare_trips`'
+   88          WHERE time(CAST(start_date AS datetime) ) < '12:00:00'
+   89  esc
+   90  clear
+   91  z
+   92  !!:s^C
+   93  !!:s^Z
+   94  pwd
+   95  ls
+   96  pwd
+   97  /w205
+   98  w205/
+   99  cd w205/
+  100  sudo apt update
+  101  mkdir ~/w205/redis-standalone
+  102  cd ..
+  103  cd redis-standalone/
+  104  pwd
+  105  cd w205/redis-standalone
+  106  ls
+  107  cp .. /course-content/05-Storing-Data-II/example-0-docker-compose.yml docker-compose.yml
+  108  cp .. /course-content-fall2021/05-Storing-Data-II/example-0-docker-compose.yml docker-compose.yml
+  109  cp .. /course-content-fall2021/05-Storing-Data-II/example-0-docker-compose.yml
+  110  cp ../course-content-fall2021/05-Storing-Data-II/example-0-docker-compose.yml
+  111  cp ../course-content-fall2021/05-Storing-Data-II/example-0-docker-compose.yml docker-compose.yml
+  112  cp?
+  113  ?cp
+  114  cp --help
+  115  docker-compose down
+  116  mkdir ~/w205/redis-cluster
+  117  cp ../course-content-fall2021/05-Storing-Data-II/example-1-docker-compose.yml docker-compose.yml
+  118  ls
+  119  enter
+  120  vim docker-compose.yml
+  121  cd w205/project-3-bkbormes1
+  122  cp w205/full-stack/docker-compose.yml
+  123  cp w205/full-stack/docker-compose.yml .
+  124  docker-compose up -d
+  125  docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+  126  docker-compose exec mids env FLASK_APP=/w205/full-stack/nfl_api.py flask run --host 0.0.0.0
+  127  docker-compose exec mids env FLASK_APP=/w205/project-3-bkbormes1/nfl_api.py flask run --host 0.0.0.0
+  128  history > bkbormes-terminal1-history.txt
