@@ -20,5 +20,12 @@ docker-compose exec mids curl http://localhost:5000/get_game_data
 
 sleep 10s
 
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning -e
 
+sleep 10s
 
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games.py
+
+sleep 10s
+
+docker-compose exec cloudera hadoop fs -ls /tmp/games/

@@ -3,8 +3,11 @@
 """
 
 import json
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf
+import pandas as pd
+from pyspark.sql.functions import explode, split
+from pyspark.sql import SparkSession, Row
+from pyspark.sql.types import StructType, StructField, StringType, FloatType, IntegerType, TimestampType
+import warnings
 
 def main():
     """main
@@ -23,14 +26,24 @@ def main():
         .option("endingOffsets", "latest") \
         .load()
     
-# Adjust as necessary to properly format our table
     games = raw_games.select(raw_games.value.cast('string'))
-    final_schema = StructType([StructField('GameKey', StringType(), True),StructField('AwayTeam', StringType(), True),StructField('HomeTeam', StringType(), True)])
+    
+    final_schema = StructType([StructField('GameKey', StringType(), True),
+                     StructField('Week', StringType(), True),
+                     StructField('AwayTeam', StringType(), True),
+                     StructField('AwayScore', IntegerType(), True),
+                     StructField('HomeTeam', StringType(), True),
+                     StructField('HomeScore', IntegerType(), True),
+                     StructField('PointSpread', FloatType(), True),
+                     StructField('OverUnder', FloatType(), True),
+                     StructField('AwayTeamMoneyLine', IntegerType(), True),
+                     StructField('HomeTeamMoneyLine', IntegerType(), True)])
+    
     games_df = games.rdd.map(lambda x: json.loads(x.value)).toDF(schema=final_schema)
 
     games_df \
         .write \
-        .parquet("/tmp/extracted_games")
+        .parquet("/tmp/games")
 
 
 if __name__ == "__main__":
