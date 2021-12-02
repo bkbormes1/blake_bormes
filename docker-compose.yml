@@ -14,7 +14,7 @@ services:
     extra_hosts:
       - "moby:127.0.0.1"
 
-kafka:
+  kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
@@ -30,16 +30,15 @@ kafka:
       - "moby:127.0.0.1"
 
   cloudera:
-    image: midsw205/hadoop:0.0.2
-    hostname: cloudera
+    image: midsw205/cdh-minimal:latest
     expose:
       - "8020" # nn
+      - "50070" # nn http
       - "8888" # hue
       - "9083" # hive thrift
       - "10000" # hive jdbc
-      - "50070" # nn http
-    ports:
-      - "8888:8888"
+    #ports:
+    #- "8888:8888"
     extra_hosts:
       - "moby:127.0.0.1"
 
