@@ -1,3 +1,10 @@
+Due Sunday
+- README with links to all parts of pipeline
+- explain business problem
+- overview of our pipeline
+- results and analysis
+
+
 # W205_Project_3
 
 https://sportsdata.io/developers/api-documentation/nfl#/fantasy/nfl-v3-projections-projected-player-game-stats-by-week-w-injuries-lineups-dfs-salaries
