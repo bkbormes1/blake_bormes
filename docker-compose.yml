@@ -14,7 +14,7 @@ services:
     extra_hosts:
       - "moby:127.0.0.1"
 
-  kafka:
+kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
@@ -30,13 +30,16 @@ services:
       - "moby:127.0.0.1"
 
   cloudera:
-    image: midsw205/cdh-minimal:latest
+    image: midsw205/hadoop:0.0.2
+    hostname: cloudera
     expose:
       - "8020" # nn
-      - "50070" # nn http
       - "8888" # hue
-    #ports:
-    #- "8888:8888"
+      - "9083" # hive thrift
+      - "10000" # hive jdbc
+      - "50070" # nn http
+    ports:
+      - "8888:8888"
     extra_hosts:
       - "moby:127.0.0.1"
 
@@ -57,6 +60,18 @@ services:
     extra_hosts:
       - "moby:127.0.0.1"
     command: bash
+
+  presto:
+    image: midsw205/presto:0.0.1
+    hostname: presto
+    volumes:
+      - ~/w205:/w205
+    expose:
+      - "8080"
+    environment:
+      HIVE_THRIFTSERVER: cloudera:9083
+    extra_hosts:
+      - "moby:127.0.0.1"
 
   mids:
     image: midsw205/base:0.1.9
