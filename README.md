@@ -3,7 +3,7 @@ Due Sunday
 - explain business problem
 - overview of our pipeline
 - results and analysis
-
+- detail API capabilities and limitations
 
 # W205_Project_3
 
