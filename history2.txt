@@ -3,15 +3,25 @@ chmod 755 first_script
 ./first_script
 
 
-#11/28 update
+#12/4 update
 #run each of these manually for now, will need to be turned into a bash script 
 
+# Fire up containers
 docker-compose up -d
+
+# Check hadoop
 docker-compose exec cloudera hadoop fs -ls /tmp/
+
+# Create topic
 docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+
+# Set up API - open new terminal
 docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
 
-# Generated Data
+# SET UP WATCHER - open new terminal
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning
+
+# Generated Data - open new terminal
 for i in {1..6}; do
   docker-compose exec mids \
     ab -n 1 -H "Host: user2.att.com" \
@@ -22,10 +32,11 @@ done
 # OR One API Call
 docker-compose exec mids curl http://localhost:5000/get_game_data
 
+# Not needed when using watcher
 docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning -e
 
 # Runs psypark
-docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games.py
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games1.py
 
 # Check for files
 docker-compose exec cloudera hadoop fs -ls /tmp/games/
@@ -36,3 +47,41 @@ docker-compose exec cloudera hadoop fs -ls /tmp/games/
 
 
 
+#### AUSTIN TESTING HISTORY 
+# Fire up containers
+docker-compose up -d
+
+# Create topic
+docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+
+# Set up API - open new terminal
+docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
+
+# SET UP WATCHER - open new terminal
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning
+
+# Generated Data (CHANGED TO 120s for testing) - open new terminal
+for i in {1..6}; do
+  docker-compose exec mids \
+    ab -n 1 -H "Host: user2.att.com" \
+      http://localhost:5000/get_game_data
+  sleep 120
+done
+
+# Pyspark - extract_games1 is the stream file - open new terminal
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games_stream.py
+
+# HIVE - this did not work
+docker-compose exec cloudera hive
+
+create external table if not exists default.the_games (
+    raw_game string,
+    GameKey string,
+    Week string,
+    AwayTeam string,
+    HomeTeam string
+    
+  )
+  stored as parquet 
+  location '/tmp/games'
+  tblproperties ("parquet.compress"="SNAPPY");
