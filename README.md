@@ -99,5 +99,18 @@ The `extract_games_stream.py` file defines the schema for our data, initiates a 
 - [Spark Batch File](https://github.com/alexdrossos/W205_Project_3/blob/main/extract_games.py)
 - [Docker-Compose File](https://github.com/alexdrossos/W205_Project_3/blob/main/docker-compose.yml)
 
+### Descriptions of Files
+
+- API_test.ipynb: initial test to pull data from the API and to understand the data structure and data present
+- docker-compose.yml: docker-compose file to set up the required images including zookeeper, kafka, cloudera, spark, presto, and mids
+- extract_games_stream.py: Our .py file to extract events from kafka and stream them into HDFS
+- extract_games.py: Our .py file to extract events from kafka and land them in HDFS (batch)
+- history2.txt: Terminal history of commands used to execute pipeline, with explanation 
+- nfl_api.py: File to pull data from the API including the get_game_data event
+- scores.json: JSON file with an example output of the data from our API
+- spark_testing.ipynb: Read json data with Spark from Parquet for test analysis of our data
+- Project_3.ipynb: analysis to answer business questions
+
+
 # Conclusion
 
