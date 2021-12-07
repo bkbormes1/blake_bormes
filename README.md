@@ -1,123 +1,116 @@
-Due Sunday
-- README with links to all parts of pipeline
-- explain business problem
-- overview of our pipeline
-- results and analysis
-- detail API capabilities and limitations
+# Project 3: Data Driven Bets
+# Alexandra Drossos, Courtney Smith, Blake Bormes, Austin Sanders
 
-# W205_Project_3
+# Description of Problem
 
-https://sportsdata.io/developers/api-documentation/nfl#/fantasy/nfl-v3-projections-projected-player-game-stats-by-week-w-injuries-lineups-dfs-salaries
+Sports betting is a growing market, and it is becoming legal in more and more states. A lot of betting predictions are based on what others have already bet, including people who follow their "gut instinct" or bet on their favorite teams regardless of statistical predictions. We want to create a service in the growing market of sports betting to help make weekly predictions for sports bettors and give live updates on games our customers have bet on. For example, the weekly predictions would give information such as, "The Titans are favored to beat the Texans at a -1200 Money Line (12 to 1 odds) with a -14 point spread. Earlier in the year, they lost to the Jets while they were favored at a -900 Money Line with a -11 point spread. Therefore, the Titans can get beaten by teams when significantly favored to win. If the Titans start the game poorly, you may want to consider betting on the underdog." The live updates on games customers bet on could be similar to this example: If you bet Packers -3, the app will update you that "2nd quarter Packers are down 6 points, so they need to score 10 points to cover the spread." Additionally, we could further explore the idea of tracking a customer's weekly betting performance in a future version of the application.
 
+- [Data Source](https://sportsdata.io/developers/api-documentation/nfl#/fantasy/nfl-v3-projections-projected-player-game-stats-by-week-w-injuries-lineups-dfs-salaries)
 
-# Notes
-Pipeline:
-Events-Stream-Queue-Store
-- create script (can be bash) to run kafka/pyspark set up in terminal ('doing the jobs')
-- py scripts will GET data, filter into table, save to Hadoop
-- run script in terminal using 'exec spark, spark-submit'
-
-Query-Analysis
-- use notebook for visualizations and exploratory analysis (query side)
-
-Next Steps
-- limit columns for only what we want to use in analysis (scores, teams, betting info, other ideas?). Make our table queryable
-- we need to think about our 'research questions' - what will we use this pipeline for
+# Research Questions
+Given this business context, we have determined the following initial questions we would like to analyze given our data set: 
+- If I'm considering betting on the 49'ers, could the app tell me the spread, over under, and money line?
+- If I'm reviewing all teams' performance compared to what the spread predictions were, can the app let me know a list of the final scores, spread predictions, and delta ordered from biggest difference to smallest?
+- Given a bettor's team and spread, can the app let me know what the game score is and how far above or below the score the spread is?
+- Can the app analyze the biggest upsets based on money line for all teams for a given week?
 
 
-# Project 3: Understanding User Behavior
+# Tools Utilized
 
-## This is a team project, up to 4 people per team. At Week 14, you will present your project to the class.
+Google Cloud Platorm (GCP) - Establish Virtual Machine (VM) and infrastructure for
+data pipeline.
 
-- You have two options
+Kafka - The queue for the files. Publish and consume messages for the dataset.
 
-### 1. Option 1: Mock data
+Zookeeper - The main node managing kafka.
 
-  - You're a data scientist at a game development company  
+Spark - Transforms the dataset to store it in a readable and queryable format.
 
-  - Your latest mobile game has two events you're interested in tracking: `buy a
-    sword` & `join guild`
+Hadoop Distributed File System (HDFS) - Storage system for the readable tables.
 
-  - Each has metadata characterstic of such events (i.e., sword type, guild name,
-    etc)
+Jupyter Notebook - Runs spark functions and queries; used for exploratory analysis. 
 
-### 2. Option 2: Real Data
+# Pipeline Description
+To ingest this data from the SportsDataIO API and make it available to our consumers to query, we had to construct a complete streaming data pipeline. The docker-compose.yml inherently provides a good overview of the tools we used to accomplish this. However, it will be more intuitive to go in sequential order by use to describe the pipeline functionality. For starters, this entire pipeline is executed through the command line, and therefore the explanation will be accompanied with the various commands that were used. At the front end of the pipeline is the SportsDataIO API. Surprisingly, this was the only free NFL data API we could find that functioned properly with mostly reliable data. For future work, we would recommend using a subscription API like GoalServe or SportsRadar. However, for the purposes of this implementation project, this free API was sufficient.
 
-  - Use your favorite API to connect to real data (Finance, News API, etc.)
+The first task we had to run was to spin up our pipeline from our docker-compose.yml file. This was accomplished by running the following command:
 
-  - Define your problem and your solution.
+```
+docker-compose up -d
+```
 
-## Tasks
+The next step was to create our kafka topics, “games” for streaming live game updates and "season" for a batch pull of all data for the season so far. 
+A Kafka topic is basically a category you declare to organize data. This data is sent to and received from the topic in the form of messages (or packets of data). In this example, we will be calling the SportsDataIO API to receive NFL games scores data and that will be sent into the ‘games’ kafka topic. The command below, in setting up the kafka topic, essentially creates the conduit for the scores data to be pushed to and received from:
 
-- Instrument your API server to log events to Kafka (Alex)
+```
+docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+```
 
-- Assemble a data pipeline to catch these events: use Spark streaming to filter
-  select event types from Kafka, land them into HDFS/parquet to make them
-  available for analysis using Presto. (Austin)
+For this project, we used Zookeeper with Kafka. Zookeeper’s job is to manage the cluster. It coordinates brokers and is a consistent file system for all configuration information. 
 
-- Use Apache Bench to generate test data for your pipeline. (Blake)
+Next, we run our Flask Application from our “mids” virtual machine using the following command:
 
-- Construct some research questions from the data (Alex)
+```
+docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
+```
 
-- Conduct some basic analysis on the events - queries/visualizations in a notebook (Courtney)
+At a high level, Flask is a web framework written in Python, providing developers with tools and libraries to build web applications. It creates a server from which you can send and receive requests. In this command, we’re running our Flask server, with the application defined in the nfl_api.py file. The --host argument is set to 0.0.0.0 to enable the server to be publicly available, meaning it’s open to non-local connections as well. Now that we have our Flask application running, we can go into nfl_api.py to unpack what will actually happen when this application is run. 
 
-- Produce an analytics report where you provide a description of your pipeline. (All)
-- Produce a presentation for Week 14 - in 3 weeks (All)
+The Flask application, held within the `nfl_api.py` file, calls the SportsDataIO API, pulls in the data from the call, and logs it to the kafka topics via a Kafka producer that is initialized in the line:
+producer = KafkaProducer(bootstrap_servers='kafka:29092')
+Firstly, the get_game_data function calls the API. SportsDataIO offers many API endpoints for NFL data. The endpoint that this function utilizes is the ScoresByDate endpoint, which pulls the scores for each game by date. If you pass in the current date and there are games being played, the scores are live updated every 5 minutes. The other endpoint we utilized in a separate function was the ScoresByWeek endpoint, which is used for our consumers to get historical game data. Both of these endpoints were accessed via an HTTP GET request with our unique API key. After calling the API, the response is stored in .json() format and passed to the log_to_kafka function. Because this response “event” was stored as one big JSON string, rather than representing the x number of games going on, we used a for loop to parse each game out and have it sent to the Kafka producer as a separate event. Meaning, if there are 10 games going on when the API is called, the log_to_kafka function will send 10 separate events to the Kafka producer. 
+
+Now with our “mids” server running our Flask application, we execute the following Apache Bench command to execute the call to our API and send the data to our Kafka producer:
+ 
+```
+for i in {1..6}; do
+  docker-compose exec mids \
+    ab -n 1 -H "Host: user2.att.com" \
+      http://localhost:5000/get_game_data
+  sleep 600
+done
+```
+
+This command calls the API through the /get_game_data route once every 10 minutes for an hour. This is because we’re wanting our consumers to have access to live score updates. The API we’re using only updates its data every 5 minutes, so these intervals will be hopefully spaced out enough to provide meaningful updates. That was one limitation with our API. Additionally, because we are using a free version of the API, SportsDataIO disclosed that about 10% of the data would be scrambled. 
+
+While the apache bench command is running, we can set up a Kafka consumer watcher. This will consume all the messages in the Kafka topic:
+
+```
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning
+```
+
+Next, we use Spark to extract the streaming events from our Kafka topic and write them to HDFS using the following command:
+
+```
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games_stream.py
+```
+
+The `extract_games_stream.py` file defines the schema for our data, initiates a Spark session, extracts the data from our Kafka topic, converts it to our schema, and writes the events to a parquet file every 6 minutes.
+
+# FILL IN REST OF COMMANDS
 
 
-Use a notebook or markdown to present your queries and findings. Remember that this
-notebook should be appropriate for presentation to someone else in your
-business who needs to act on your recommendations. 
 
-It's understood that events in this pipeline are _generated_ events which make
-them hard to connect to _actual_ business decisions.  However, we'd like
-students to demonstrate an ability to plumb this pipeline end-to-end, which
-includes initially generating test data as well as submitting a notebook-based
-report of at least simple event analytics.
+# Links to Files
 
-If you are doing option 1, analytics are a small part of your final product. If you are doing Option 2, you can focus more on analytics and visualizations.
+- [Project_3 Analysis Notebook](https://github.com/alexdrossos/W205_Project_3/blob/main/Project_3.ipynb)
+- [NFL API File](https://github.com/alexdrossos/W205_Project_3/blob/main/nfl_api.py)
+- [Spark Streaming File](https://github.com/alexdrossos/W205_Project_3/blob/main/extract_games_stream.py)
+- [Spark Batch File](https://github.com/alexdrossos/W205_Project_3/blob/main/extract_games.py)
+- [Docker-Compose File](https://github.com/alexdrossos/W205_Project_3/blob/main/docker-compose.yml)
 
-## Options
+### Descriptions of Files
 
-There are plenty of advanced options for this project.  Here are some ways to
-take your project further than just the basics we'll cover in class:
+- API_test.ipynb: initial test to pull data from the API and to understand the data structure and data present
+- docker-compose.yml: docker-compose file to set up the required images including zookeeper, kafka, cloudera, spark, presto, and mids
+- extract_games_stream.py: Our .py file to extract events from kafka and stream them into HDFS
+- extract_games.py: Our .py file to extract events from kafka and land them in HDFS (batch)
+- history2.txt: Terminal history of commands used to execute pipeline, with explanation 
+- nfl_api.py: File to pull data from the API including the get_game_data event
+- scores.json: JSON file with an example output of the data from our API
+- spark_testing.ipynb: Read json data with Spark from Parquet for test analysis of our data
+- Project_3.ipynb: analysis to answer business questions
 
-- Generate and filter more types of events.  There are plenty of other things
-  you might capture as events.
-  
-- Enhance the API to use additional http verbs such as `POST` or `DELETE` as
-  well as additionally accept _parameters_ for events.
 
-- Connect a user-keyed storage engine such as Redis or Cassandra up to Spark so
-  you can track user state during gameplay (e.g., user's inventory or health)
-  
----
+# Conclusion
 
-#### GitHub Procedures
-
-Important:  In w205, please never merge your assignment branch to the master branch. 
-
-Using the git command line: clone down the repo, leave the master branch untouched, create an assignment branch, and move to that branch:
-- Open a linux command line to your virtual machine and be sure you are logged in as jupyter.
-- Create a ~/w205 directory if it does not already exist `mkdir ~/w205`
-- Change directory into the ~/w205 directory `cd ~/w205`
-- Clone down your repo `git clone <https url for your repo>`
-- Change directory into the repo `cd <repo name>`
-- Create an assignment branch `git branch assignment`
-- Checkout the assignment branch `git checkout assignment`
-
-The previous steps only need to be done once.  Once you your clone is on the assignment branch it will remain on that branch unless you checkout another branch.
-
-The project workflow follows this pattern, which may be repeated as many times as needed.  In fact it's best to do this frequently as it saves your work into GitHub in case your virtual machine becomes corrupt:
-- Make changes to existing files as needed.
-- Add new files as needed
-- Stage modified files `git add <filename>`
-- Commit staged files `git commit -m "<meaningful comment about your changes>"`
-- Push the commit on your assignment branch from your clone to GitHub `git push origin assignment`
-
-Once you are done, go to the GitHub web interface and create a pull request comparing the assignment branch to the master branch.  Add your instructor, and only your instructor, as the reviewer.  The date and time stamp of the pull request is considered the submission time for late penalties. 
-
-If you decide to make more changes after you have created a pull request, you can simply close the pull request (without merge!), make more changes, stage, commit, push, and create a final pull request when you are done.  Note that the last data and time stamp of the last pull request will be considered the submission time for late penalties.
-
-Make sure you receive the emails related to your repository! Your project feedback will be given as comment on the pull request. When you receive the feedback, you can address problems or simply comment that you have read the feedback. 
-AFTER receiving and answering the feedback, merge you PR to master. Your project only counts as complete once this is done.
