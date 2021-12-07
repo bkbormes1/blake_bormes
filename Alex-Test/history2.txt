@@ -1,0 +1,45 @@
+# Fire up containers
+docker-compose up -d
+
+# Check hadoop
+docker-compose exec cloudera hadoop fs -ls /tmp/games
+
+# Create topic for stream data
+docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+
+# Create topic for batch data
+docker-compose exec kafka kafka-topics --create --topic season --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+
+# Set up API - open new terminal
+docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/Alex-Test/nfl_api.py flask run --host 0.0.0.0
+
+# SET UP WATCHER for games data
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning
+
+# Generated Data - open new terminal
+for i in {1..10}; do
+  docker-compose exec mids \
+    ab -n 1 -H "Host: user2.att.com" \
+      http://localhost:5000/get_game_data
+  sleep 600
+done
+
+# Runs psypark for stream data
+docker-compose exec spark spark-submit /w205/W205_Project_3/Alex-Test/extract_games_stream.py
+
+# Check for files
+docker-compose exec cloudera hadoop fs -ls /tmp/games/
+
+#after streaming is done...
+#generate batch event
+docker-compose exec mids curl http://localhost:5000/get_season_data
+
+# Runs psypark for batch data
+docker-compose exec spark spark-submit /w205/W205_Project_3/Alex-Test/extract_games.py
+
+# Check for files
+docker-compose exec cloudera hadoop fs -ls /tmp/season
+
+#open jupyter for analysis
+#DONT RERUN STREAMING DATA COMMANDS
+docker-compose exec spark env PYSPARK_DRIVER_PYTHON=jupyter PYSPARK_DRIVER_PYTHON_OPTS='notebook --no-browser --port 8889 --ip 0.0.0.0 --allow-root --notebook-dir=/w205/' pyspark
