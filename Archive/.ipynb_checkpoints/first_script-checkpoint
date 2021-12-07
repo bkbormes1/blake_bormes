@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# My first script
+
+docker-compose up -d
+
+sleep 60s # Waits 15 seconds.
+
+docker-compose ps
+
+docker-compose exec -T kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+
+sleep 10s
+
+docker-compose exec -d mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
+
+sleep 10s
+
+docker-compose exec mids curl http://localhost:5000/get_game_data
+
+sleep 10s
+
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning -e
+
+sleep 10s
+
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games.py
+
+sleep 10s
+
+docker-compose exec cloudera hadoop fs -ls /tmp/games/
