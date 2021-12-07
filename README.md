@@ -35,18 +35,24 @@ To ingest this data from the SportsDataIO API and make it available to our consu
 
 The first task we had to run was to spin up our pipeline from our docker-compose.yml file. This was accomplished by running the following command:
 
-```docker-compose up -d```
+```
+docker-compose up -d
+```
 
 The next step was to create our kafka topics, “games” for streaming live game updates and "season" for a batch pull of all data for the season so far. 
 A Kafka topic is basically a category you declare to organize data. This data is sent to and received from the topic in the form of messages (or packets of data). In this example, we will be calling the SportsDataIO API to receive NFL games scores data and that will be sent into the ‘games’ kafka topic. The command below, in setting up the kafka topic, essentially creates the conduit for the scores data to be pushed to and received from:
 
-```docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181```
+```
+docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+```
 
 For this project, we used Zookeeper with Kafka. Zookeeper’s job is to manage the cluster. It coordinates brokers and is a consistent file system for all configuration information. 
 
 Next, we run our Flask Application from our “mids” virtual machine using the following command:
 
-```docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0```
+```
+docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
+```
 
 At a high level, Flask is a web framework written in Python, providing developers with tools and libraries to build web applications. It creates a server from which you can send and receive requests. In this command, we’re running our Flask server, with the application defined in the nfl_api.py file. The --host argument is set to 0.0.0.0 to enable the server to be publicly available, meaning it’s open to non-local connections as well. Now that we have our Flask application running, we can go into nfl_api.py to unpack what will actually happen when this application is run. 
 
@@ -55,22 +61,29 @@ producer = KafkaProducer(bootstrap_servers='kafka:29092')
 Firstly, the get_game_data function calls the API. SportsDataIO offers many API endpoints for NFL data. The endpoint that this function utilizes is the ScoresByDate endpoint, which pulls the scores for each game by date. If you pass in the current date and there are games being played, the scores are live updated every 5 minutes. The other endpoint we utilized in a separate function was the ScoresByWeek endpoint, which is used for our consumers to get historical game data. Both of these endpoints were accessed via an HTTP GET request with our unique API key. After calling the API, the response is stored in .json() format and passed to the log_to_kafka function. Because this response “event” was stored as one big JSON string, rather than representing the x number of games going on, we used a for loop to parse each game out and have it sent to the Kafka producer as a separate event. Meaning, if there are 10 games going on when the API is called, the log_to_kafka function will send 10 separate events to the Kafka producer. 
 
 Now with our “mids” server running our Flask application, we execute the following Apache Bench command to execute the call to our API and send the data to our Kafka producer:
- ```for i in {1..6}; do
+ 
+```
+for i in {1..6}; do
   docker-compose exec mids \
     ab -n 1 -H "Host: user2.att.com" \
       http://localhost:5000/get_game_data
   sleep 600
 done
- ```
+```
+
 This command calls the API through the /get_game_data route once every 10 minutes for an hour. This is because we’re wanting our consumers to have access to live score updates. The API we’re using only updates its data every 5 minutes, so these intervals will be hopefully spaced out enough to provide meaningful updates. That was one limitation with our API. Additionally, because we are using a free version of the API, SportsDataIO disclosed that about 10% of the data would be scrambled. 
 
 While the apache bench command is running, we can set up a Kafka consumer watcher. This will consume all the messages in the Kafka topic:
 
-```docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning```
+```
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning
+```
 
 Next, we use Spark to extract the streaming events from our Kafka topic and write them to HDFS using the following command:
 
-```docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games_stream.py```
+```
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games_stream.py
+```
 
 The `extract_games_stream.py` file defines the schema for our data, initiates a Spark session, extracts the data from our Kafka topic, converts it to our schema, and writes the events to a parquet file every 6 minutes.
 
