@@ -11,7 +11,7 @@ docker-compose exec kafka kafka-topics --create --topic games --partitions 1 --r
 docker-compose exec kafka kafka-topics --create --topic season --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
 
 # Set up API - open new terminal
-docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/Alex-Test/nfl_api.py flask run --host 0.0.0.0
+docker-compose exec mids env FLASK_APP=/w205/W205_Project_3/nfl_api.py flask run --host 0.0.0.0
 
 # SET UP WATCHER for games data
 docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning
@@ -25,7 +25,7 @@ for i in {1..10}; do
 done
 
 # Runs psypark for stream data
-docker-compose exec spark spark-submit /w205/W205_Project_3/Alex-Test/extract_games_stream.py
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games_stream.py
 
 # Check for files
 docker-compose exec cloudera hadoop fs -ls /tmp/games/
@@ -35,7 +35,7 @@ docker-compose exec cloudera hadoop fs -ls /tmp/games/
 docker-compose exec mids curl http://localhost:5000/get_season_data
 
 # Runs psypark for batch data
-docker-compose exec spark spark-submit /w205/W205_Project_3/Alex-Test/extract_games.py
+docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games.py
 
 # Check for files
 docker-compose exec cloudera hadoop fs -ls /tmp/season
