@@ -93,7 +93,7 @@ The `extract_games_stream.py` file defines the schema for our data, initiates a 
 
 # Links to Files
 
-- [Project_3 Analysis Notebook](https://github.com/alexdrossos/W205_Project_3/blob/main/Project_3.ipynb)
+- [Project_3 Analysis Notebook](https://github.com/alexdrossos/W205_Project_3/blob/main/Analysis.ipynb)
 - [NFL API File](https://github.com/alexdrossos/W205_Project_3/blob/main/nfl_api.py)
 - [Spark Streaming File](https://github.com/alexdrossos/W205_Project_3/blob/main/extract_games_stream.py)
 - [Spark Batch File](https://github.com/alexdrossos/W205_Project_3/blob/main/extract_games.py)
