@@ -30,7 +30,10 @@ docker-compose exec spark spark-submit /w205/W205_Project_3/extract_games_stream
 # Check for files
 docker-compose exec cloudera hadoop fs -ls /tmp/games/
 
-#after streaming is done...
+# after streaming is done...
+#SET UP WATCHER for games data
+docker-compose exec mids kafkacat -C -b kafka:29092 -t games -o beginning
+
 #generate batch event
 docker-compose exec mids curl http://localhost:5000/get_season_data
 
